@@ -3,7 +3,7 @@ import { Clock } from 'lucide-react';
 
 interface TimeSlotPickerProps {
   date: Date;
-  roomTypeId: number;
+  roomTypeId: string;
   startTime: string;
   endTime: string;
   onStartTimeChange: (time: string) => void;
@@ -31,7 +31,9 @@ const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({
     for (let hour = 8; hour <= 20; hour++) {
       const hourFormatted = hour.toString().padStart(2, '0');
       slots.push(`${hourFormatted}:00`);
-      slots.push(`${hourFormatted}:30`);
+      if (hour < 20) { // Don't add :30 for the last hour
+        slots.push(`${hourFormatted}:30`);
+      }
     }
     setAvailableTimeSlots(slots);
   }, []);

@@ -11,7 +11,7 @@ type FormData = {
   name: string;
   contactNumber: string;
   date: Date | null;
-  roomTypeId: number;
+  roomTypeId: string;
   startTime: string;
   endTime: string;
 };
@@ -44,11 +44,18 @@ const BookingPage: React.FC = () => {
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      await createBooking(data);
+      await createBooking({
+        name: data.name,
+        contactNumber: data.contactNumber,
+        date: data.date,
+        roomTypeId: data.roomTypeId,
+        startTime: data.startTime,
+        endTime: data.endTime
+      });
       setShowConfirmation(true);
     } catch (error) {
       console.error('Error creating booking:', error);
-      // Show error message
+      alert('Error creating booking. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -63,7 +70,7 @@ const BookingPage: React.FC = () => {
       <div className="container mx-auto px-4 py-16 flex flex-col items-center animate-fade-in">
         <div className="w-full max-w-md text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="text-success\" size={32} />
+            <Check className="text-success" size={32} />
           </div>
           <h1 className="text-2xl font-bold mb-4">Booking Confirmed!</h1>
           <p className="mb-8 text-gray-600">
@@ -256,10 +263,6 @@ const BookingPage: React.FC = () => {
               <div className="bg-blue-50 p-4 rounded-lg mb-6">
                 <h3 className="text-lg font-medium mb-2">Booking Summary</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="text-gray-600">Room Type:</div>
-                  <div className="font-medium">
-                    {roomTypes.find(r => r.id === selectedRoomTypeId)?.name}
-                  </div>
                   <div className="text-gray-600">Date:</div>
                   <div className="font-medium flex items-center gap-1">
                     <Calendar size={14} />
@@ -296,30 +299,5 @@ const BookingPage: React.FC = () => {
     </div>
   );
 };
-
-// Sample data for room types (same as in HomePage)
-const roomTypes = [
-  {
-    id: 1,
-    name: 'Conference Room',
-    description: 'Perfect for meetings and presentations with full AV equipment.',
-    price: 75,
-    image: 'https://images.pexels.com/photos/1181396/pexels-photo-1181396.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-  },
-  {
-    id: 2,
-    name: 'Private Office',
-    description: 'Quiet space for focused work or small team collaborations.',
-    price: 45,
-    image: 'https://images.pexels.com/photos/3182826/pexels-photo-3182826.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-  },
-  {
-    id: 3,
-    name: 'Event Space',
-    description: 'Large open area for events, workshops, and social gatherings.',
-    price: 120,
-    image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'
-  }
-];
 
 export default BookingPage;

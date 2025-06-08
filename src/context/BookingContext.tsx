@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import axios from 'axios';
 
 export interface CalendarItem {
-  id: number;
+  id: string;
   title: string;
   date: string; // ISO date string
   startTime: string; // 24-hour format
@@ -16,7 +16,7 @@ interface BookingFormData {
   name: string;
   contactNumber: string;
   date: Date | null;
-  roomTypeId: number;
+  roomTypeId: string;
   startTime: string;
   endTime: string;
 }
@@ -80,7 +80,10 @@ export const BookingProvider: React.FC<BookingProviderProps> = ({ children }) =>
       }
     };
 
-    fetchData();
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchData();
+    }
   }, []);
   
   const createBooking = async (data: BookingFormData): Promise<void> => {

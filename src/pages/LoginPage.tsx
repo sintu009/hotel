@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Lock, User } from 'lucide-react';
+import { Lock, User, Calendar } from 'lucide-react';
 import axios from 'axios';
 
 interface LoginFormData {
@@ -12,32 +12,64 @@ interface LoginFormData {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState('');
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>();
+  const [isLoading, setIsLoading] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    defaultValues: {
+      username: 'admin',
+      password: 'admin123'
+    }
+  });
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/');
+    }
+  }, [navigate]);
 
   const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true);
+    setError('');
+    
     try {
       const response = await axios.post('http://localhost:5000/api/auth/login', data);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       navigate('/');
     } catch (error) {
-      setError('Invalid username or password');
+      console.error('Login error:', error);
+      if (axios.isAxiosError(error)) {
+        setError(error.response?.data?.message || 'Login failed. Please try again.');
+      } else {
+        setError('Network error. Please check if the server is running.');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary p-3 rounded-full text-white">
+              <Calendar size={32} />
+            </div>
+          </div>
+          <h2 className="text-3xl font-extrabold text-gray-900">
+            Welcome to SpaceBook
           </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Sign in to manage your bookings
+          </p>
         </div>
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div className="mb-4">
-              <label htmlFor="username" className="sr-only">Username</label>
+        <div className="bg-white p-8 rounded-xl shadow-lg">
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <div>
+              <label htmlFor="username" className="form-label">Username</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400" />
@@ -46,17 +78,17 @@ const LoginPage: React.FC = () => {
                   id="username"
                   type="text"
                   {...register('username', { required: 'Username is required' })}
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Username"
+                  className="form-input pl-10"
+                  placeholder="Enter your username"
                 />
               </div>
               {errors.username && (
-                <p className="mt-2 text-sm text-red-600">{errors.username.message}</p>
+                <p className="form-error">{errors.username.message}</p>
               )}
             </div>
             
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
+              <label htmlFor="password" className="form-label">Password</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -65,35 +97,38 @@ const LoginPage: React.FC = () => {
                   id="password"
                   type="password"
                   {...register('password', { required: 'Password is required' })}
-                  className="appearance-none rounded-lg relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Password"
+                  className="form-input pl-10"
+                  placeholder="Enter your password"
                 />
               </div>
               {errors.password && (
-                <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
+                <p className="form-error">{errors.password.message}</p>
               )}
             </div>
-          </div>
 
-          {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="flex">
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">{error}</h3>
-                </div>
+            {error && (
+              <div className="rounded-md bg-red-50 p-4 border border-red-200">
+                <div className="text-sm text-red-800">{error}</div>
+              </div>
+            )}
+
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials</h3>
+              <div className="text-xs text-blue-700">
+                <p><strong>Username:</strong> admin</p>
+                <p><strong>Password:</strong> admin123</p>
               </div>
             </div>
-          )}
 
-          <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              disabled={isLoading}
+              className="w-full btn btn-primary"
             >
-              Sign in
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
