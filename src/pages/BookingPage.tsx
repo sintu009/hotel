@@ -70,7 +70,7 @@ const BookingPage: React.FC = () => {
       <div className="container mx-auto px-4 py-16 flex flex-col items-center animate-fade-in">
         <div className="w-full max-w-md text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="text-success" size={32} />
+            <Check className="text-success\" size={32} />
           </div>
           <h1 className="text-2xl font-bold mb-4">Booking Confirmed!</h1>
           <p className="mb-8 text-gray-600">
